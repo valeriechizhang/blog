@@ -1,7 +1,10 @@
 <div class="post">
     <div class="post-heading">
         <div class="post-title text-center">
-            {{p.subject}}
+            <a href="/{{p.key().id()}}">{{p.subject}}</a>
+        </div>
+        <div class="post-author text-center">
+            by {{p.author}}
         </div>
         <div class="post-date text-center">
             {{p.created.strftime("%b %d, %Y")}}

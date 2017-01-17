@@ -3,6 +3,7 @@ import re
 import random
 import hashlib
 import hmac
+import time
 from string import letters
 
 import webapp2
@@ -90,6 +91,7 @@ class User(db.Model):
 class Post(db.Model):
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
+    author = db.StringProperty()
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
 
@@ -98,6 +100,14 @@ class Post(db.Model):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("post-format.html", p = self)
 
+class Comment(db.Model):
+    post_id = db.StringProperty(required = True)
+    user_name = db.StringProperty(required = True)
+    comment = db.TextProperty()
+
+class Like(db.Model):
+    post_id = db.StringProperty(required = True)
+    user_name = db.StringProperty(required = True)
 
 
 # the handler is inherited by other handlers
@@ -147,7 +157,7 @@ class Handler(webapp2.RequestHandler):
 # It displays the front the page and lists all the blog posts
 class FrontPage(Handler):
     def get(self):
-        posts = db.GqlQuery("Select * From Post")
+        posts = db.GqlQuery("Select * From Post Order by created DESC Limit 10")
         self.render('front.html', posts = posts)
 
 # It displays one certain blog posts
@@ -160,7 +170,13 @@ class PostPage(Handler):
             self.error(404)
             return
 
-        self.render("single-post.html", post = post)
+        likes = Like.all().filter("post_id =", post_id)
+        liked = False
+        for like in likes:
+            if like.user_name == self.user.name:
+                liked = True
+
+        self.render("single-post.html", post = post, user=self.user, likes = likes, liked = liked)
 
 
 # It displays the form that creates a new post
@@ -179,14 +195,91 @@ class NewPostPage(Handler):
 
         subject = self.request.get('subject')
         content = self.request.get('content')
+        author = self.user.name
 
         if subject and content:
-            p = Post(subject = subject, content = content)
+            p = Post(subject = subject, content = content, author = author)
             p.put()
             self.redirect('/%s' % str(p.key().id()))
         else:
             error = "subject and content, please!"
             self.render("newpost.html", subject=subject, content=content, error=error)
+
+
+class EditPost(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+
+        if self.user.name != post.author:
+            self.redirect('/%s' % str(post_id))
+
+        if not post:
+            self.error(404)
+            return
+
+        self.render("newpost.html", subject=post.subject, content=post.content)
+
+    def post(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+        subject = self.request.get('subject')
+        content = self.request.get('content')
+
+        if subject and content:
+            post.subject = subject
+            post.content = content
+            post.put()
+            self.redirect('/%s' % str(post_id))
+        else:
+            error = "subject and content, please!"
+            self.render("newpost.html", subject=subject, content=content, error=error)
+
+
+class DeletePost(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+
+        if self.user.name != post.author:
+            self.redirect('/%s' % str(post_id))
+
+        post.delete()
+        time.sleep(0.1)
+        self.redirect('/')
+
+
+class LikePost(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+
+        if self.user.name == post.author:
+            self.redirect('/%s' % str(post_id))
+
+        likes = Like.all().filter("post_id =", post_id)
+
+        for like in likes:
+            if like.user_name == self.user.name:
+                self.redirect('/%s' % str(post_id))
+
+        l = Like(post_id = post_id, user_name = self.user.name)
+        l.put()
+        self.redirect('/%s' % str(post_id))
+
+
+class UnlikePost(Handler):
+    def get(self, post_id):
+        like = Like.all().filter("post_id =", post_id).filter("user_name =", self.user.name).get()
+        like.delete()
+        time.sleep(0.1)
+        self.redirect('/%s' % str(post_id))
+
+
+class CommentPost(Handler):
+    pass
+
+
 
 
 # Below 3 functions help validify the enterd username, email, and passwords
@@ -282,8 +375,12 @@ app = webapp2.WSGIApplication([
     ('/signup', SignupPage),
     ('/logout', LogoutPage),
     ('/newpost', NewPostPage),
-    ('/([0-9]+)', PostPage)
-
+    ('/([0-9]+)', PostPage),
+    ('/([0-9]+)/edit', EditPost),
+    ('/([0-9]+)/like', LikePost),
+    ('/([0-9]+)/unlike', UnlikePost),
+    ('/([0-9]+)/comment', CommentPost),
+    ('/([0-9]+)/delete', DeletePost)
 ], debug=True)
 
 

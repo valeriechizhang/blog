@@ -30,6 +30,9 @@ h2 {
     color: #b4957c;
 }
 
+h4 {
+    color: #b4957c;
+}
 
 a {
     color: #b4957c;
@@ -91,6 +94,10 @@ table {
     font-style: bold;
 }
 
+.post-author {
+    font-size: 14px;
+}
+
 .post-date {
     font-size: 10px;
     font-style: italic;
@@ -112,7 +119,7 @@ table {
     text-decoration: none;
     display: inline-block;
     font-size: 14px;
-    margin-top: 20px;
+    margin-top: 10px;
     margin-bottom: 20px;
 }
 
