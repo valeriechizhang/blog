@@ -1,0 +1,169 @@
+body {
+    min-height:100vh;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    color: #2d3c49;
+    font-weight: 300;
+    background-color: #e6d1c8;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+input {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+}
+
+textarea {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    padding: 5px 10px;
+    width: 100%;
+    height: 150px;
+}
+
+h2 {
+    color: #b4957c;
+}
+
+
+a {
+    color: #b4957c;
+}
+
+a:hover {
+    color: #fec821;
+    text-decoration: none;
+}
+
+table {
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+@media screen and (min-width: 1000px) {
+    body {
+        width: 1000px;
+        margin: auto;
+    }
+}
+
+
+@media screen and (min-width: 1000px) {
+    body {
+        width: 1000px;
+        margin: auto;
+    }
+}
+
+.main-section {
+    background-color: #f1f2f2;
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+.main-title {
+    margin-top: 30px;
+    font-size: 50px;
+    font-weight: 900;
+}
+
+.main-title > a {
+    color: #614126;
+}
+
+.main-title > a:hover {
+    color: #aa7243;
+}
+
+.blog-content {
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.post-title {
+    font-size: 20px;
+    font-style: bold;
+}
+
+.post-date {
+    font-size: 10px;
+    font-style: italic;
+}
+
+.label {
+    color: #eda31d;
+    font-size: 15px;
+}
+
+.button {
+    background-color: white;
+    border-style: solid;
+    border-color: #fec821;
+    border: 5;
+    color: #b4957c;
+    padding: 5px 22px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.button:hover {
+    color: white;
+    background: #fec821;
+}
+
+.error {
+    color: #ff4c4c;
+}
+
+.welcome {
+    font-size: 13px;
+}
+
+.logout {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.write > a {
+    font-size: 20px;
+    color: #eda31d;
+}
+
+.write:hover > a {
+    font-size: 20px;
+    color: #fec821;
+}
+
+
+.subject-input {
+    width: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

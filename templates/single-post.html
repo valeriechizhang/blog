@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+<div class="post-single">
+    {% block content %}
+        {{post.render() | safe}}
+    {% endblock %}
+</div>

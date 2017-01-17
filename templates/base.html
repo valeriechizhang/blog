@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+        <title>Blog</title>
+        <link type="text/css" rel="stylesheet" href="css/bootstrap.css">
+        <link type="text/css" rel="stylesheet" href="css/main.css">
+    </head>
+
+    <body>
+        <div class="container main-section">
+            <div class="row">
+                <div class="col-md-12 text-center main-title">
+                    <a href="/">Blog</a><br>
+                </div>
+            </div>
+
+            <div class="row text-center">
+                <div class="col-md-12 login-area">
+                    {% if user %}
+                        <div class="welcome">Welcome, {{user.name}}! </div>
+                        <div class="logout">(<a class="login-link" href="/logout">logout</a>)</div>
+                        <div class="write"><a class="write-link" href="/newpost">Write Post</a></div>
+                    {% else %}
+                        <a class="login-link" href="/login">login</a>
+                            |
+                        <a class="login-link" href="/signup">signup</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row text-center divider ">
+                <img class="img-responsive" src="img/divider.png" alt="divider">
+            </div>
+
+            <div class="blog-content">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+    </body>
+</html>
