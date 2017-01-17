@@ -1,38 +1,52 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="post-single">
-        {{post.render() | safe}}
-</div>
+    <div class="post-single">
+            {{post.render() | safe}}
+    </div>
 
+    <br>
     <div class="post-action text-center">
         {% if user%}
             {% if user.name == post.author %}
-                | <a href="/{{post.key().id()}}/edit">Edit</a> | <a href="/{{post.key().id()}}/delete">Delete</a>
+                <a href="/{{post.key().id()}}/edit">Edit</a> | <a href="/{{post.key().id()}}/delete">Delete</a>
             {% elif liked %}
-                <a href="/{{post.key().id()}}/unlike">Unike</a>
+                <a class="like-button" href="/{{post.key().id()}}/unlike">Unike</a>
             {% else %}
-                <a href="/{{post.key().id()}}/like">Like</a>
+                <a class="unlike-button" href="/{{post.key().id()}}/like">Like</a>
             {% endif %}
         {% endif %}
     </div>
 
     <div class="liked-by">
+        <h4>Liked by: </h4>
         {% for like in likes %}
-            {{ like.user_name }} | {{ like.post_id }}<br>
+            {{ like.user_name }} &nbsp
         {% endfor %}
     </div>
 
     <div class ="write-comment">
-        <form method="post">
-            <h4>Leave a comment:</h4>
-            <div><textarea name="comment-content">{{content}}</textarea></div>
-            <input class="button" type="submit">
-        </form>
+        {% if user %}
+            <form method="post">
+                <h4>Leave a comment:</h4>
+                <div><textarea name="comment-content">{{content}}</textarea></div>
+                <input class="button" type="submit">
+            </form>
+        {% endif %}
     </div>
 
     <div class="comments">
-
+        {% for comment in comments %}
+            <div class="comment">
+                {{comment.render() | safe}}
+                <div class="comment-action">
+                    {% if comment.user_name == user.name %}
+                         <a href="/{{comment.key().id()}}/editcomment">Edit</a> | <a href="/{{comment.key().id()}}/deletecomment">Delete</a>
+                    {% endif %}
+                </div>
+                <hr>
+            </div>
+        {% endfor %}
     </div>
 
 

@@ -31,7 +31,7 @@ h2 {
 }
 
 h4 {
-    color: #b4957c;
+    color: #eda31d;
 }
 
 a {
@@ -55,7 +55,6 @@ table {
         margin: auto;
     }
 }
-
 
 @media screen and (min-width: 1000px) {
     body {
@@ -116,8 +115,6 @@ table {
     color: #b4957c;
     padding: 5px 22px;
     text-align: center;
-    text-decoration: none;
-    display: inline-block;
     font-size: 14px;
     margin-top: 10px;
     margin-bottom: 20px;
@@ -126,6 +123,45 @@ table {
 .button:hover {
     color: white;
     background: #fec821;
+}
+
+
+.like-button {
+    background-color: white;
+    border-style: solid;
+    border-color: #fec821;
+    border-radius: 30px;
+    border: 3;
+    color: #b4957c;
+    padding: 5px 10px;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.like-button:hover {
+    color: white;
+    background: #fec821;
+}
+
+.unlike-button {
+    background-color: #fec821;
+    border-style: solid;
+    border-color: #fec821;
+    border-radius: 30px;
+    border: 3;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.unlike-button:hover {
+    color: #fec821;
+    background: white;
 }
 
 .error {
@@ -151,11 +187,37 @@ table {
     color: #fec821;
 }
 
-
 .subject-input {
     width: 100%;
 }
 
+.liked-by {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.comments {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.comment {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.comment-user {
+    font-size: 14px;
+}
+
+.comment-date {
+    font-style: italic;
+    font-size: 10px;
+}
+
+.comment-content {
+    font-size: 12px;
+}
 
 
 

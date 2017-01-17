@@ -54,7 +54,22 @@ def valid_pw(name, password, h):
     return h == make_pw_hash(name, password, salt)
 
 
-## DATABASE (User and Posts)##
+## DATABASE ##
+
+# methods to clean up all the database before deployment
+def cleanup():
+    user = User.all()
+    for u in user:
+        u.delete()
+    post = Post.all()
+    for p in post:
+        p.delete()
+    comment = Comment.all()
+    for c in comment:
+        c.delete()
+    like = Like.all()
+    for l in like:
+        l.delete()
 
 class User(db.Model):
     name = db.StringProperty(required = True)
@@ -104,6 +119,11 @@ class Comment(db.Model):
     post_id = db.StringProperty(required = True)
     user_name = db.StringProperty(required = True)
     comment = db.TextProperty()
+    created = db.DateTimeProperty(auto_now_add = True)
+
+    def render(self):
+        self._render_text = self.comment.replace('\n', '<br>')
+        return render_str("comment-format.html", c = self)
 
 class Like(db.Model):
     post_id = db.StringProperty(required = True)
@@ -157,6 +177,7 @@ class Handler(webapp2.RequestHandler):
 # It displays the front the page and lists all the blog posts
 class FrontPage(Handler):
     def get(self):
+        #cleanup()
         posts = db.GqlQuery("Select * From Post Order by created DESC Limit 10")
         self.render('front.html', posts = posts)
 
@@ -171,12 +192,29 @@ class PostPage(Handler):
             return
 
         likes = Like.all().filter("post_id =", post_id)
-        liked = False
-        for like in likes:
-            if like.user_name == self.user.name:
-                liked = True
+        comments = Comment.all().filter("post_id =", post_id).order('-created')
 
-        self.render("single-post.html", post = post, user=self.user, likes = likes, liked = liked)
+        liked = False
+        if self.user:
+            for like in likes:
+                if like.user_name == self.user.name:
+                    liked = True
+
+        self.render("single-post.html", post = post, user=self.user, likes = likes, liked = liked, comments=comments)
+
+    # mainly used for posting comments
+    def post(self, post_id):
+        if not self.user:
+            self.redirect('/%s' % post_id)
+
+        comment = self.request.get("comment-content")
+
+        if comment:
+            c = Comment(post_id=post_id, user_name=self.user.name, comment=comment)
+            c.put()
+            time.sleep(0.1)
+
+        self.redirect('/%s' % post_id)
 
 
 # It displays the form that creates a new post
@@ -230,6 +268,7 @@ class EditPost(Handler):
             post.subject = subject
             post.content = content
             post.put()
+            time.sleep(0.1)
             self.redirect('/%s' % str(post_id))
         else:
             error = "subject and content, please!"
@@ -244,7 +283,19 @@ class DeletePost(Handler):
         if self.user.name != post.author:
             self.redirect('/%s' % str(post_id))
 
+        # also need to delete related Like and Comment items
         post.delete()
+        likes = Like.all().filter("post_id =", post_id)
+        if likes:
+            for like in likes:
+                like.delete()
+
+        comments = Comment.all().filter("post_id =", post_id)
+        if comments:
+            for comment in comments:
+                comment.delete()
+
+
         time.sleep(0.1)
         self.redirect('/')
 
@@ -265,6 +316,7 @@ class LikePost(Handler):
 
         l = Like(post_id = post_id, user_name = self.user.name)
         l.put()
+        time.sleep(0.1)
         self.redirect('/%s' % str(post_id))
 
 
@@ -276,10 +328,35 @@ class UnlikePost(Handler):
         self.redirect('/%s' % str(post_id))
 
 
-class CommentPost(Handler):
-    pass
+class EditComment(Handler):
+    def get(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id))
+        comment = db.get(key)
+        self.render("editcomment.html", content=comment.comment)
+
+    def post(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id))
+        comment = db.get(key)
+        new_content = self.request.get("comment-content")
+
+        if new_content:
+            comment.comment = new_content
+            comment.put()
+            time.sleep(0.1)
+            self.redirect('/%s' % str(comment.post_id))
+        else:
+            error = "Comment cannot be empty"
+            self.render("editcomment.html", error=error)
 
 
+class DeleteComment(Handler):
+    def get(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id))
+        comment = db.get(key)
+        post_id = comment.post_id
+        comment.delete()
+        time.sleep(0.1)
+        self.redirect('/%s' % str(post_id))
 
 
 # Below 3 functions help validify the enterd username, email, and passwords
@@ -379,10 +456,9 @@ app = webapp2.WSGIApplication([
     ('/([0-9]+)/edit', EditPost),
     ('/([0-9]+)/like', LikePost),
     ('/([0-9]+)/unlike', UnlikePost),
-    ('/([0-9]+)/comment', CommentPost),
-    ('/([0-9]+)/delete', DeletePost)
-], debug=True)
-
+    ('/([0-9]+)/delete', DeletePost),
+    ('/([0-9]+)/editcomment', EditComment),
+    ('/([0-9]+)/deletecomment', DeleteComment)],debug=True)
 
 
 #!/usr/bin/env python
