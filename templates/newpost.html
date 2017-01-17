@@ -14,6 +14,12 @@
                 <div class="error">{{error}}</div>
 
                 <input class="button" type="submit">
+
+                {% if post_id %}
+                    <a class="cancel" href={{"/%s" % post_id}}>cancel</a>
+                {% else %}
+                    <a class="cancel" href="/">cancel</a>
+                {% endif %}
             </form>
     </div>
 

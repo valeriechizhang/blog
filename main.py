@@ -256,7 +256,7 @@ class EditPost(Handler):
             self.error(404)
             return
 
-        self.render("newpost.html", subject=post.subject, content=post.content)
+        self.render("newpost.html", subject=post.subject, content=post.content, post_id=post_id)
 
     def post(self, post_id):
         key = db.Key.from_path('Post', int(post_id))
