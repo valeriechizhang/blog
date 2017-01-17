@@ -13,5 +13,25 @@ indexes:
 - kind: Comment
   properties:
   - name: post_id
+
+- kind: Comment
+  properties:
+  - name: post_id
   - name: created
+    direction: desc
+
+- kind: Like
+  properties:
+  - name: post_id
+
+- kind: Post
+  ancestor: yes
+  properties:
+  - name: created
+    direction: desc
+
+- kind: Post
+  ancestor: yes
+  properties:
+  - name: date
     direction: desc

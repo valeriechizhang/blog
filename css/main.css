@@ -118,6 +118,7 @@ table {
     font-size: 14px;
     margin-top: 10px;
     margin-bottom: 20px;
+    border-radius: 4px;
 }
 
 .button:hover {
