@@ -17,7 +17,7 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 
 SECRET = "thisisasecretkey"
 
-# helper functions (not included in any class):
+# some helper functions (not included in any class):
 
 # render_str returns a web page template (HTML) with parameters input
 def render_str(template, **params):
@@ -115,6 +115,7 @@ class Post(db.Model):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("post-format.html", p = self)
 
+
 class Comment(db.Model):
     post_id = db.StringProperty(required = True)
     user_name = db.StringProperty(required = True)
@@ -124,6 +125,7 @@ class Comment(db.Model):
     def render(self):
         self._render_text = self.comment.replace('\n', '<br>')
         return render_str("comment-format.html", c = self)
+
 
 class Like(db.Model):
     post_id = db.StringProperty(required = True)
@@ -181,6 +183,7 @@ class FrontPage(Handler):
         posts = db.GqlQuery("Select * From Post Order by created DESC Limit 10")
         self.render('front.html', posts = posts)
 
+
 # It displays one certain blog posts
 class PostPage(Handler):
     def get(self, post_id):
@@ -194,6 +197,7 @@ class PostPage(Handler):
         likes = Like.all().filter("post_id =", post_id)
         comments = Comment.all().filter("post_id =", post_id).order('-created')
 
+        # a user is not allowed to like his/her own post
         liked = False
         if self.user:
             for like in likes:
@@ -245,6 +249,7 @@ class NewPostPage(Handler):
 
 
 class EditPost(Handler):
+    # display the post content in the form
     def get(self, post_id):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
@@ -430,6 +435,8 @@ class LoginPage(Handler):
         username = self.request.get('username')
         password = self.request.get('password')
 
+        # User.login return the correct the user information for the database
+        # self.login(u) actually set the cookies for the user
         u = User.login(username, password)
         if u:
             self.login(u)
