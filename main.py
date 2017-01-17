@@ -253,14 +253,19 @@ class NewPostPage(Handler):
 class EditPost(Handler):
     # display the post content in the form
     def get(self, post_id):
+        if not self.user:
+            self.redirect('/%s' % str(post_id))
+            return
+
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
 
-        if self.user.name != post.author:
-            self.redirect('/%s' % str(post_id))
-
         if not post:
             self.error(404)
+            return
+
+        if self.user.name != post.author:
+            self.redirect('/%s' % str(post_id))
             return
 
         self.render("newpost.html", subject=post.subject, content=post.content, post_id=post_id)
@@ -269,7 +274,11 @@ class EditPost(Handler):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
 
-        if not self.user or not post:
+        if not post:
+            self.error(404)
+            return
+
+        if not self.user:
             self.redirect('/%s' % str(post_id))
             return
 
@@ -296,7 +305,11 @@ class DeletePost(Handler):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
 
-        if not self.user or not post:
+        if not post:
+            self.error(404)
+            return
+
+        if not self.user:
             self.redirect('/%s' % str(post_id))
             return
 
@@ -326,8 +339,17 @@ class LikePost(Handler):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
 
+        if not post:
+            self.error(404)
+            return
+
+        if not self.user:
+            self.redirect('/%s' % str(post_id))
+            return
+
         if self.user.name == post.author:
             self.redirect('/%s' % str(post_id))
+            return
 
         likes = Like.all().filter("post_id =", post_id)
 
@@ -343,7 +365,16 @@ class LikePost(Handler):
 
 class UnlikePost(Handler):
     def get(self, post_id):
+        if not self.user:
+            self.redirect('/%s' % str(post_id))
+            return
+
         like = Like.all().filter("post_id =", post_id).filter("user_name =", self.user.name).get()
+
+        if not like:
+            self.redirect('/%s' % str(post_id))
+            return
+
         like.delete()
         time.sleep(0.1)
         self.redirect('/%s' % str(post_id))
@@ -353,11 +384,33 @@ class EditComment(Handler):
     def get(self, comment_id):
         key = db.Key.from_path('Comment', int(comment_id))
         comment = db.get(key)
+
+        if not comment:
+            self.error(404)
+            return
+
+        if not self.user:
+            self.redirect('/%s' % str(comment.post_id))
+            return
+
         self.render("editcomment.html", content=comment.comment)
 
     def post(self, comment_id):
         key = db.Key.from_path('Comment', int(comment_id))
         comment = db.get(key)
+
+        if not comment:
+            self.error(404)
+            return
+
+        if not self.user:
+            self.redirect('/%s' % str(comment.post_id))
+            return
+
+        if self.user.name != comment.user_name:
+            self.redirect('/%s' % str(comment.post_id))
+            return
+
         new_content = self.request.get("comment-content")
 
         if new_content:
@@ -374,24 +427,38 @@ class DeleteComment(Handler):
     def get(self, comment_id):
         key = db.Key.from_path('Comment', int(comment_id))
         comment = db.get(key)
+
+        if not comment:
+            self.error(404)
+            return
+
         post_id = comment.post_id
+
+        if not self.user:
+            self.redirect('/%s' % str(post_id))
+            return
+
+        if self.user.name != comment.user_name:
+            self.redirect('/%s' % str(post_id))
+            return
+
         comment.delete()
         time.sleep(0.1)
         self.redirect('/%s' % str(post_id))
 
 
 # Below 3 functions help validify the enterd username, email, and passwords
-USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
-    return username and USER_RE.match(username)
+    user_re = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+    return username and user_re.match(username)
 
-PASS_RE = re.compile(r"^.{3,20}$")
 def valid_password(password):
-    return password and PASS_RE.match(password)
+    pass_re = re.compile(r"^.{3,20}$")
+    return password and pass_re.match(password)
 
-EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
-    return not email or EMAIL_RE.match(email)
+    email_re  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
+    return not email or email_re.match(email)
 
 # It displays the Sign Up Page
 class SignupPage(Handler):
