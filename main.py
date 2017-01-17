@@ -210,6 +210,7 @@ class PostPage(Handler):
     def post(self, post_id):
         if not self.user:
             self.redirect('/%s' % post_id)
+            return
 
         comment = self.request.get("comment-content")
 
@@ -234,6 +235,7 @@ class NewPostPage(Handler):
     def post(self):
         if not self.user:
             self.redirect('/')
+            return
 
         subject = self.request.get('subject')
         content = self.request.get('content')
@@ -266,6 +268,15 @@ class EditPost(Handler):
     def post(self, post_id):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
+
+        if not self.user or not post:
+            self.redirect('/%s' % str(post_id))
+            return
+
+        if post.username != self.user.name:
+            self.redirect('/%s' % str(post_id))
+            return
+
         subject = self.request.get('subject')
         content = self.request.get('content')
 
@@ -285,8 +296,13 @@ class DeletePost(Handler):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
 
+        if not self.user or not post:
+            self.redirect('/%s' % str(post_id))
+            return
+
         if self.user.name != post.author:
             self.redirect('/%s' % str(post_id))
+            return
 
         # also need to delete related Like and Comment items
         post.delete()
